@@ -1,0 +1,12 @@
+- hosts: localhost
+become: true
+tasks:
+- name: install httpd
+  yum: name=httpd update_cache=yes state=latest
+  notify:
+   - start httpd
+handlers:
+- name: start httpd
+  service:
+    name=httpd
+    state=restarted

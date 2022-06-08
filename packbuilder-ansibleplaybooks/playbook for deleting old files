@@ -1,0 +1,16 @@
+- name: file module demo
+  hosts: g1
+  vars:
+    mypath: "/home/ubuntu/sonar/sonarqube-7.6/lib/common"
+  become: true
+  tasks:
+    - name: Ansible delete files older than 5 days example
+      find:
+        paths: "{{ mypath }}"
+        age: 30d
+      register: files_to_delete
+    - name: Ansible remove files older than a date example
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ files_to_delete.files }}"

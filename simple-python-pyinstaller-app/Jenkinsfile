@@ -1,0 +1,24 @@
+pipeline {
+    agent any 
+    stages {
+        stage('clone') { 
+              steps('Checkout'){
+                  checkout scm
+                sh 'ls -ll'                
+           }
+        }
+        stage('Build') { 
+            steps { 
+                
+        
+        sh 'python sources/*.py'
+       // sh 'python sources/calc.py'
+        
+               
+                
+            }
+        }
+       
+        
+    }
+}

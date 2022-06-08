@@ -1,0 +1,103 @@
+ # to check wheather file exists or not
+ - name: check alternatives.log
+    stat:
+      path: /var/www/html/index.html
+    register: info
+  - name: tell if the file is there
+    debug:
+      msg: file exists
+    when: info.stat.exists
+  - name: tell if file missing
+    debug:
+      msg: the file missing
+    when: not info.stat.exists
+
+# to check wheather directory exists or not
+
+  - name: check Backup directory
+    stat:
+      path: /var/www/html/Backup
+    register: dir_info
+  - name: tell if the Backup dir is there
+    debug:
+      msg: Backup directory exists
+    when: dir_info.stat.exists
+  - name: tell if Backup dir missing
+    debug:
+      msg: the Backup directory missing
+    when: not dir_info.stat.exists
+
+
+ # To delete older files as mentoined 15d 
+   NOTE (if we want to delete directory we can mention  file_type: directory) 
+
+- name: file module demo
+  hosts: g1
+  become: true
+  vars:
+    mypath: "/home/rocky/sonar/sonarqube-9.4.0.54424/bin/windows-x86-64"
+  tasks:
+    - name: Ansible delete files older than 6 days example
+      find:
+        paths: "{{ mypath }}"
+        age: 15d
+        file_type: directory   ( Here can mention if target is directory if not leave default for files )
+      register: files_to_delete
+    - name: print the output
+      debug: var=item.path
+      with_items: "{{ files_to_delete.files }}"
+
+    - name: Ansible remove files older than a date example
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ files_to_delete.files }}"
+
+
+
+
+# Perfect code to fail the job when target file or directory is not present
+
+  - name: Get stats of a file
+    ansible.builtin.stat:
+      path: /home/rocky/test-env/requirements.txt
+    register: st
+  - name: print the output
+    debug:
+      msg: requirements exists
+    when: st.stat.exists
+  - name: Fail if the file does  'exists'
+    ansible.builtin.fail:
+      msg: "Whoops! requirements.txt file has not found please add it"
+    when: not st.stat.exists
+
+
+# to run linux command on particular path f directory
+
+- name: connecting jenkins server
+  hosts: g1
+  become: true
+  tasks:
+#  - name: Get stats of a file
+#    ansible.builtin.stat:
+#      path: /home/rocky/test-env/requirements.txt
+#    register: st
+  - name: 'run the following command'
+    command: sh requirements.txt
+    args:
+        chdir: /home/rocky/test-env/
+    register: require
+  - name: 'print the output'
+    debug:
+      var: require.stdout
+
+#code to replace the git clone already exists NOTE(check the permission of Directory where we are cloningg)
+- hosts: g1
+  gather_facts: true
+  tasks:
+  - name: Clone a github repository
+    git:
+      repo: https://github.com/ravibabukonda/packbuilder-ansibleplaybooks.git
+      dest: /var/www/html/today
+      force: yes
+      version: main
